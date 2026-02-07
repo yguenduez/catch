@@ -46,7 +46,7 @@ USER appuser
 COPY --from=build /bin/catch /bin/
 
 # Document the port your app listens on.
-EXPOSE 8000
+EXPOSE 8111
 
 # Start the application.
 CMD ["/bin/catch"]

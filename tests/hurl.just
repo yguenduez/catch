@@ -3,7 +3,7 @@
 hurl_opts := "--variables-file variables --test"
 
 wait-for-api:
-    hurl health.hurl --retry 30 --retry-interval 1000 {{ hurl_opts }}
+    hurl health.hurl --retry 1 --retry-interval 1000 {{ hurl_opts }}
 
 # run acceptance tests against the running test stack
 test *args: wait-for-api
