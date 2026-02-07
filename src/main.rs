@@ -1,15 +1,11 @@
 #![warn(clippy::all, clippy::pedantic)]
 
-use actix_web::{App, HttpServer, Responder, get};
+use actix_web::{App, HttpServer};
 use env_logger::Env;
 use log::info;
 
-#[get("/health")]
-async fn health() -> impl Responder {
-    "Ok"
-}
-
 mod config;
+mod health;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -19,7 +15,7 @@ async fn main() -> std::io::Result<()> {
 
     info!("{config}");
 
-    HttpServer::new(|| App::new().service(health))
+    HttpServer::new(|| App::new().service(health::health))
         .bind(config.adress())?
         .run()
         .await
