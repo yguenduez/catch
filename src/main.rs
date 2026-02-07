@@ -1,11 +1,12 @@
 #![warn(clippy::all, clippy::pedantic)]
 
-use actix_web::{App, HttpServer};
+use actix_web::{App, HttpServer, web};
 use env_logger::Env;
 use log::info;
 
 mod config;
 mod health;
+mod kv_store;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -15,8 +16,16 @@ async fn main() -> std::io::Result<()> {
 
     info!("{config}");
 
-    HttpServer::new(|| App::new().service(health::health))
-        .bind(config.adress())?
-        .run()
-        .await
+    let data = web::Data::new(kv_store::new());
+
+    HttpServer::new(move || {
+        App::new()
+            .app_data(data.clone())
+            .service(health::health)
+            .service(kv_store::get_kv)
+            .service(kv_store::set_kv)
+    })
+    .bind(config.adress())?
+    .run()
+    .await
 }

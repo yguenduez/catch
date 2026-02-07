@@ -1,0 +1,52 @@
+use std::{
+    collections::{HashMap, HashSet},
+    str::FromStr,
+    sync::Mutex,
+    task::Context,
+};
+
+use actix_web::{HttpRequest, HttpResponse, Responder, get, http::header::HeaderValue, post, web};
+
+pub type KeyValueStore = Mutex<HashMap<String, HashMap<String, String>>>;
+
+pub fn new() -> KeyValueStore {
+    Mutex::new(HashMap::new())
+}
+
+#[get("/kv/{key}")]
+pub async fn get_kv(key: web::Path<String>, store: web::Data<KeyValueStore>) -> impl Responder {
+    match store.lock().unwrap().get(&key.clone()) {
+        Some(value) => HttpResponse::Ok().json(value),
+        None => HttpResponse::NotFound().body("Key not found"),
+    }
+}
+
+#[post("/kv/{key}")]
+pub async fn set_kv(
+    req: HttpRequest,
+    key: web::Path<String>,
+    value: String,
+    store: web::Data<KeyValueStore>,
+) -> impl Responder {
+    let static_def = &HeaderValue::from_str("default").unwrap();
+    let context = req
+        .headers()
+        .get("X-Context")
+        .unwrap_or(static_def)
+        .to_str()
+        .unwrap();
+
+    let mut store = store.lock().unwrap();
+
+    let Some(inner) = store.get_mut(context) else {
+        // no context found, create context
+        let mut k = HashMap::new();
+        k.insert(key.clone(), value);
+        store.insert(context.to_string(), k);
+        return HttpResponse::Ok().body("Key set");
+    };
+
+    inner.insert(key.clone(), value);
+
+    HttpResponse::Ok().body("Key set")
+}
