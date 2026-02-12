@@ -4,6 +4,7 @@ use actix_web::{App, HttpServer, web};
 use env_logger::Env;
 use log::info;
 
+mod assets;
 mod config;
 mod health;
 mod kv_store;
@@ -22,6 +23,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(data.clone())
+            .service(assets::assets)
             .service(health::health)
             .service(kv_store::get_kv)
             .service(kv_store::set_kv)

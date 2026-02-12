@@ -13,6 +13,14 @@ pub async fn index(store: web::Data<KeyValueStore>) -> AwResult<maud::Markup> {
 pub fn render_kv(kv: &HashMap<String, HashMap<String, String>>) -> maud::Markup {
     let kv = kv.clone();
     maud::html! {
+        head{
+            // load from /assets/t.css
+            // load from /assets/h.js
+            link rel="stylesheet" href="/assets/t.css"{}
+            script src="/assets/h.js" {}
+        }
+
+
        div{
            h2 { "Key-Value Store" }
            ul {
