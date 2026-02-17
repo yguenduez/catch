@@ -8,6 +8,8 @@ mod assets;
 mod config;
 mod health;
 mod kv_store;
+mod runtime;
+mod script;
 mod view;
 
 #[actix_web::main]
@@ -28,6 +30,7 @@ async fn main() -> std::io::Result<()> {
             .service(kv_store::get_kv)
             .service(kv_store::set_kv)
             .service(kv_store::delete_kv)
+            .service(script::run)
             .service(view::index)
             .service(view::key_value::kv_page)
             .service(view::proxy::proxy_page)
